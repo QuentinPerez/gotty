@@ -1,5 +1,17 @@
+function getUrlVars(url) {
+    var hash;
+    var myJson = {};
+    var hashes = url.slice(url.indexOf('?') + 1).split('&');
+    for (var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        myJson[hash[0]] = hash[1];
+    }
+    return myJson;
+}
+
 (function() {
     var httpsEnabled = window.location.protocol == "https:";
+    var jsonArgs = getUrlVars(window.location.search)
     var url = (httpsEnabled ? 'wss://' : 'ws://') + window.location.host + window.location.pathname + 'ws';
     var protocols = ["gotty"];
     var autoReconnect = -1;
@@ -12,8 +24,8 @@
         var pingTimer;
 
         ws.onopen = function(event) {
-            ws.send(gotty_auth_token);
-
+            jsonArgs["AuthToken"] = gotty_auth_token
+            ws.send(JSON.stringify(jsonArgs));
             pingTimer = setInterval(sendPing, 30 * 1000, ws);
 
             hterm.defaultStorage = new lib.Storage.Local();
